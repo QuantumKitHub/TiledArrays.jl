@@ -42,9 +42,8 @@ Base.getindex(a::HyperCubicArray, i::Int) = getindex(a.data, i)
 Base.setindex!(a::HyperCubicArray, v, i::Int) = setindex!(a.data, v, i)
 
 Base.similar(::HyperCubicArray, ::Type{S}, dims::Dims{N}) where {S,N} = HyperCubicArray{S,N}(undef, dims)
-function Base.similar(::Type{<:HyperCubicArray{T}}, inds::Tuple{LatticeRange,Vararg{LatticeRange,N′}}) where {T,N′}
-    N = N′ + 1
+function Base.similar(::Type{<:HyperCubicArray{T}}, inds::Tuple{LatticeRange,Vararg{LatticeRange,N}}) where {T,N}
     B = map(boundary_conditions, inds)
     dims = map(length, inds)
-    return HyperCubicArray{T,N,B}(undef, dims)
+    return HyperCubicArray{T,N+1,B}(undef, dims)
 end
