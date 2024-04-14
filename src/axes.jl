@@ -34,7 +34,7 @@ Base.getindex(r::OpenRange, i::Int) = getindex(r.r, i)
 Base.getindex(r::PeriodicRange, i::Int) = getindex(r.r, mod1(i, length(r)))
 Base.getindex(r::InfiniteRange, i::Int) = getindex(r.r, i)
 
-Base.checkindex(::Type{Bool}, r::OpenRange, i::Int) = checkindex(Bool, r, i)
+Base.checkindex(::Type{Bool}, r::OpenRange, i::Int) = checkindex(Bool, r.r, i)
 Base.checkindex(::Type{Bool}, r::PeriodicRange, i::Int) = true
 Base.checkindex(::Type{Bool}, r::InfiniteRange, i::Int) = true
 
