@@ -51,6 +51,15 @@ Base.checkindex(::Type{Bool}, r::InfiniteRange, i::Int) = true
 
 Base.offsetin(i, r::PeriodicRange) = mod1(i, length(r)) - 1
 
+Base.to_shape(r::LatticeRange) = Base.to_shape(r.r)
+
 # Show
 # ----
-Base.show(io::IO, r::LatticeRange) = print(io, typeof(r), "($(last(r))")
+Base.show(io::IO, r::LatticeRange) = print(io, typeof(r), "($(last(r)))")
+
+# Various fixes
+# -------------
+
+# Avoid wrapping in IdentityUnitRange as LatticeRange is already OneTo
+Base.axes(S::Base.Slice{<:LatticeRange}) = (S.indices,)
+Base.axes1(S::Base.Slice{<:LatticeRange}) = S.indices
