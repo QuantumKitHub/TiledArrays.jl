@@ -19,6 +19,9 @@ boundary_conditions(::Type{HyperCubicArray{T,N,B}}) where {T,N,B} = B
 function HyperCubicArray{T,N,B}(::UndefInitializer, dims::Dims{N}) where {T,N,B}
     HyperCubicArray{T,N,B}(Array{T,N}(undef, dims))
 end
+function HyperCubicArray{T,N,B}(::UndefInitializer, dims::Vararg{Int,N}) where {T,N,B}
+    HyperCubicArray{T,N,B}(UndefInitializer(), dims)
+end
 # type and dimensionality specified
 HyperCubicArray{T,N}(args...) where {T,N} = HyperCubicArray{T,N,_default_boundary(N)}(args...)
 function HyperCubicArray{T,N}(::UndefInitializer, dims::Vararg{Int,N}) where {T,N}
