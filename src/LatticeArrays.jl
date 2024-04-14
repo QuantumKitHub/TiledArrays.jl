@@ -1,5 +1,15 @@
 module LatticeArrays
 
-# Write your package code here.
+# exports
+# -------
+export LatticeRange, OpenRange, PeriodicRange, InfiniteRange
+export boundary_conditions
+
+
+# imports
+# -------
+
+include("axes.jl")
+
 
 end
