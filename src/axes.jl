@@ -1,5 +1,16 @@
+@enum BoundaryCondition::UInt8 OBC PBC IBC
+const BC = BoundaryCondition
+
+const BoundaryConditions{N} = NTuple{N,BoundaryCondition}
+const BCS = BoundaryConditions
+
 struct LatticeRange{BC} <: AbstractUnitRange{Int}
     r::Base.OneTo{Int}
+    function LatticeRange{BC}(r::Base.OneTo{Int}) where {BC}
+        BC isa BoundaryCondition && return new{BC}(r)
+        BC isa Integer && return new{BoundaryCondition(BC)}(r)
+        throw(TypeError(:LatticeRange, BoundaryCondition, BC))
+    end
 end
 
 # utility constructors
@@ -10,9 +21,9 @@ end
 LatticeRange{BC}(r::Integer) where {BC} = LatticeRange{BC}(Base.OneTo(r))
 
 # type aliases
-const OpenRange = LatticeRange{:OBC}
-const PeriodicRange = LatticeRange{:PBC}
-const InfiniteRange = LatticeRange{:IBC}
+const OpenRange = LatticeRange{OBC}
+const PeriodicRange = LatticeRange{PBC}
+const InfiniteRange = LatticeRange{IBC}
 
 boundary_conditions(r::LatticeRange) = boundary_conditions(typeof(r))
 boundary_conditions(::Type{LatticeRange{BC}}) where {BC} = BC
