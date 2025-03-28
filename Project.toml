@@ -3,6 +3,10 @@ uuid = "41f948cd-8216-4059-8c54-ad7a5f2ef2f3"
 authors = ["lkdvos <lukas.devos@ugent.be> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+HexArrays = "790b99d3-2dbd-4ac5-b9be-633254b365b4"
+
 [compat]
 julia = "1.8"
 

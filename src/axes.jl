@@ -1,4 +1,4 @@
-@enum BoundaryCondition::UInt8 OBC PBC IBC
+@enum BoundaryCondition::UInt8 OBC PBC IBC SBC
 const BC = BoundaryCondition
 
 const BoundaryConditions{N} = NTuple{N,BoundaryCondition}
@@ -24,9 +24,12 @@ LatticeRange{BC}(r::Integer) where {BC} = LatticeRange{BC}(Base.OneTo(r))
 const OpenRange = LatticeRange{OBC}
 const PeriodicRange = LatticeRange{PBC}
 const InfiniteRange = LatticeRange{IBC}
+const SpiralRange = LatticeRange{SBC}
 
 boundary_conditions(r::LatticeRange) = boundary_conditions(typeof(r))
 boundary_conditions(::Type{LatticeRange{BC}}) where {BC} = BC
+
+Base.isfinite(bc::BoundaryCondition) = bc === OBC || bc === SBC
 
 # Iteration
 # ---------
@@ -44,12 +47,13 @@ Base.size(r::LatticeRange) = (length(r),)
 Base.getindex(r::OpenRange, i::Int) = getindex(r.r, i)
 Base.getindex(r::PeriodicRange, i::Int) = getindex(r.r, mod1(i, length(r)))
 Base.getindex(r::InfiniteRange, i::Int) = getindex(r.r, i)
+Base.getindex(r::SpiralRange, i::Int) = getindex(r.r, mod1(i, length(r)))
 
-Base.checkindex(::Type{Bool}, r::OpenRange, i::Int) = checkindex(Bool, r.r, i)
-Base.checkindex(::Type{Bool}, r::PeriodicRange, i::Int) = true
-Base.checkindex(::Type{Bool}, r::InfiniteRange, i::Int) = true
+Base.checkindex(::Type{Bool}, r::LatticeRange, i::Int) = boundary_conditions(r) !== OBC || checkindex(Bool, r.r, i)
 
 Base.offsetin(i, r::PeriodicRange) = mod1(i, length(r)) - 1
+# Base.offsetin(i, r::InfiniteRange) = mod1(i, length(r)) - 1
+Base.offsetin(i, r::SpiralRange) = mod1(i, length(r)) - 1
 
 Base.to_shape(r::LatticeRange) = Base.to_shape(r.r)
 
@@ -63,3 +67,15 @@ Base.show(io::IO, r::LatticeRange) = print(io, typeof(r), "($(last(r)))")
 # Avoid wrapping in IdentityUnitRange as LatticeRange is already OneTo
 Base.axes(S::Base.Slice{<:LatticeRange}) = (S.indices,)
 Base.axes1(S::Base.Slice{<:LatticeRange}) = S.indices
+
+# make sure checkbounds works with LinearIndices?
+Base.checkindex(::Type{Bool}, linds::LinearIndices, i) = checkbounds(Bool, linds, i)
+
+# make sure sub2ind works with spiral stuff
+Base.@inline function Base._sub2ind_recurse(inds::Tuple{SpiralRange,Any,Vararg{Any}}, L, ind, i::Integer, I1::Integer, I::Integer...)
+    r1 = inds[1]
+    i1 = mod1(i, length(r1))
+    i2 = div(i, length(r1))
+    i1 == length(r1) && (i2 -= 1;)
+    Base._sub2ind_recurse(Base.tail(inds), Base.nextL(L, r1), ind + (i1-1) * L, I1 + i2, I...)
+end

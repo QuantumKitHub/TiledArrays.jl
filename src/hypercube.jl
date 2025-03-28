@@ -41,8 +41,21 @@ Base.size(a::HyperCubicArray) = size(a.data)
 Base.axes(a::HyperCubicArray) = map((sz, bc) -> LatticeRange{bc}(sz), size(a), boundary_conditions(a))
 
 Base.IndexStyle(::Type{<:HyperCubicArray}) = IndexLinear()
-Base.getindex(a::HyperCubicArray, i::Int) = getindex(a.data, i)
-Base.setindex!(a::HyperCubicArray, v, i::Int) = setindex!(a.data, v, i)
+
+@inline function Base.getindex(a::HyperCubicArray, i::Int) 
+    @boundscheck checkbounds(a, i)
+    i′ = all(isfinite, boundary_conditions(a)) ? i : mod1(i, length(a.data))
+    @inbounds return getindex(a.data, i′)
+end
+
+@inline function Base.setindex!(a::HyperCubicArray, v, i::Int)
+    @boundscheck checkbounds(a, i)
+    i′ = all(isfinite, boundary_conditions(a)) ? i : mod1(i, length(a.data))
+    @inbounds a.data[i′] = v
+    return a
+end
+
+Base.eachindex(::IndexLinear, a::HyperCubicArray) = LinearIndices(axes(a))
 
 Base.similar(::HyperCubicArray, ::Type{S}, dims::Dims{N}) where {S,N} = HyperCubicArray{S,N}(undef, dims)
 function Base.similar(::Type{<:HyperCubicArray{T}}, inds::Tuple{LatticeRange,Vararg{LatticeRange,N}}) where {T,N}
