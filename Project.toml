@@ -8,6 +8,7 @@ CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 HexArrays = "790b99d3-2dbd-4ac5-b9be-633254b365b4"
 
 [compat]
+CairoMakie = "0.14"
 julia = "1.8"
 
 [extras]
