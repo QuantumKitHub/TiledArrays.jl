@@ -1,6 +1,29 @@
-struct TiledArray{T, N} <: AbstractTiledArray{T, N}
+"""
+    TiledArray{T, N, A <: AbstractArray{Int, N}} <: AbstractTiledArray{T, N}
+
+Efficient representation for arrays with repeating elements, according to some given tiling.
+Here the tiling is an array of integers of the same size as the tiled array that dictates the position in the data vector.
+
+# Fields
+
+- `data::Vector{T}` : underlying (non-duplicated) data of unique elements
+- `tiling::A}` : tiling pattern for specifying the repititions
+
+# Examples
+
+```jldoctest
+tiling = [1, 2, 3, 2, 1]
+A = TiledArray{Int}([4, 5, 6], tiling)
+collect(A)
+
+# output
+
+[4, 5, 6, 5, 4]
+```
+"""
+struct TiledArray{T, N, A <: AbstractArray{Int, N}} <: AbstractTiledArray{T, N}
     data::Vector{T}
-    tiling::Array{Int, N}
+    tiling::A
 
     function TiledArray{T, N}(data::Vector{T}, tiling::Array{Int, N}) where {T, N}
         issetequal(tiling, axes(data, 1)) || throw(ArgumentError("Incompatible data and tiling"))
