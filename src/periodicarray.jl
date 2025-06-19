@@ -1,12 +1,15 @@
 """
-    PeriodicArray{T,N} <: AbstractTiledArray{T,N}
+    PeriodicArray{T, N, A <: AbstractArray{T, N}} <: AbstractTiledArray{T, N}
 
-Array wrapper with periodic boundary conditions.
+Wrapper for an array of type `A` with periodic boundary conditions on the indexes.
+This can be understood as an infinitely repeating tiling of the parent array, along all its dimensions.
 
 # Fields
-- `data::Array{T,N}`: the data of the array
+
+- `data::A`: the wrapped parent array
 
 # Examples
+
 ```jldoctest
 A = PeriodicArray([1, 2, 3])
 A[0], A[2], A[4]
@@ -26,11 +29,16 @@ A[-1, 1], A[1, 1], A[4, 5]
 
 See also [`PeriodicVector`](@ref), [`PeriodicMatrix`](@ref)
 """
-struct PeriodicArray{T, N} <: AbstractTiledArray{T, N}
-    data::Array{T, N}
+struct PeriodicArray{T, N, A <: AbstractArray{T, N}} <: AbstractTiledArray{T, N}
+    data::A
 end
+
 PeriodicArray(data::AbstractArray{T, N}) where {T, N} = PeriodicArray{T, N}(data)
 PeriodicArray{T}(data::AbstractArray{T, N}) where {T, N} = PeriodicArray{T, N}(data)
+function PeriodicArray{T, N, A}(data::AbstractArray) where {T, N, A}
+    return PeriodicArray{T, N, A}(convert(A, data))
+end
+
 function PeriodicArray{T}(initializer, args...) where {T}
     return PeriodicArray(Array{T}(initializer, args...))
 end
@@ -38,13 +46,14 @@ function PeriodicArray{T, N}(initializer, args...) where {T, N}
     return PeriodicArray(Array{T, N}(initializer, args...))
 end
 
+
 """
     PeriodicVector{T}
 
 One-dimensional dense array with elements of type `T` and periodic boundary conditions.
 Alias for [`PeriodicArray{T, 1}`](@ref).
 """
-const PeriodicVector{T} = PeriodicArray{T, 1}
+const PeriodicVector{T} = PeriodicArray{T, 1, Vector{T}}
 PeriodicVector(data::AbstractVector{T}) where {T} = PeriodicVector{T}(data)
 
 """
@@ -53,7 +62,7 @@ PeriodicVector(data::AbstractVector{T}) where {T} = PeriodicVector{T}(data)
 Two-dimensional dense array with elements of type `T` and periodic boundary conditions.
 Alias for [`PeriodicArray{T, 2}`](@ref).
 """
-const PeriodicMatrix{T} = PeriodicArray{T, 2}
+const PeriodicMatrix{T} = PeriodicArray{T, 2, Matrix{T}}
 PeriodicMatrix(data::AbstractMatrix{T}) where {T} = PeriodicMatrix{T}(data)
 
 Base.parent(A::PeriodicArray) = A.data
@@ -101,5 +110,5 @@ end
 Base.convert(::Type{T}, A::AbstractArray) where {T <: PeriodicArray} = T(A)
 Base.convert(::Type{T}, A::PeriodicArray) where {T <: AbstractArray} = convert(T, parent(A))
 # fix ambiguities
-Base.convert(::Type{T}, A::PeriodicArray) where {T <: PeriodicArray} = A
-Base.convert(::Type{T}, A::PeriodicArray) where {T <: Array} = parent(A)
+Base.convert(::Type{T}, A::PeriodicArray) where {T <: PeriodicArray} = A isa T ? A : T(A)
+Base.convert(::Type{T}, A::PeriodicArray) where {T <: Array} = convert(T, parent(A))
