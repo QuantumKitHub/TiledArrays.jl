@@ -1,6 +1,6 @@
 using LatticeArrays
 using Test
 
-@testset "LatticeArrays.jl" begin
-    # Write your tests here.
+@testset "TiledArray" begin
+    include("tiledarray.jl")
 end
