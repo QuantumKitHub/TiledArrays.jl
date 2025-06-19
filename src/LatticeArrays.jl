@@ -1,6 +1,6 @@
 module LatticeArrays
 
-export AbstractTiledArray, TiledArray
+export AbstractTiledArray, PeriodicArray, TiledArray
 
 """
     AbstractTiledArray{T,N} <: AbstractArray{T,N}
@@ -10,6 +10,8 @@ along their axes.
 """
 abstract type AbstractTiledArray{T,N} <: AbstractArray{T,N} end
 
+include("periodicarray.jl")
 include("tiledarray.jl")
+
 
 end
