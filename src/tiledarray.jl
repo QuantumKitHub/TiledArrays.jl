@@ -13,6 +13,10 @@ struct TiledArray{T, N} <: AbstractTiledArray{T, N}
     end
 end
 
+function TiledArray{T}(::UndefInitializer, tiling::Array{Int,N}) where {T,N}
+    return TiledArray{T, N}(undef, tiling)
+end
+
 # Indexing
 # --------
 
