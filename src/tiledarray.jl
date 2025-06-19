@@ -36,7 +36,7 @@ struct TiledArray{T, N, A <: AbstractArray{Int, N}} <: AbstractTiledArray{T, N}
     end
 end
 
-function TiledArray{T}(::UndefInitializer, tiling::Array{Int,N}) where {T,N}
+function TiledArray{T}(::UndefInitializer, tiling::Array{Int, N}) where {T, N}
     return TiledArray{T, N}(undef, tiling)
 end
 
@@ -45,18 +45,31 @@ end
 
 Base.size(A::TiledArray) = size(A.tiling)
 
-Base.IndexStyle(::Type{A}) where {A <: TiledArray} = IndexLinear()
+Base.IndexStyle(::Type{T}) where {A, T <: TiledArray{<:Any, <:Any, <:A}} = IndexStyle(A)
 
+# Need to define both linear and cartesian indexing here to support the parent IndexStyle
 @inline function Base.getindex(A::TiledArray, i::Int)
     @boundscheck checkbounds(A, i)
     return @inbounds A.data[A.tiling[i]]
+end
+@inline function Base.getindex(A::TiledArray{T, N}, I::Varar{Int, N}) where {T, N}
+    @boundscheck checkbounds(A, I...)
+    return @inbounds A.data[A.tiling[I...]]
 end
 @inline function Base.setindex!(A::TiledArray, v, i::Int)
     @boundscheck checkbounds(A, i)
     @inbounds setindex!(A.data, v, A.tiling[i])
     return A
 end
+@inline function Base.setindex!(A::TiledArray{T, N}, v, I::Vararg{Int, N}) where {T, N}
+    @boundscheck checkbounds(A, I...)
+    @inbounds setindex!(A.data, v, A.tiling[I...])
+    return A
+end
 
 function Base.checkbounds(::Type{Bool}, A::TiledArray, i::Int)
     return checkbounds(Bool, A.tiling, i) && checkbounds(Bool, A.data, @inbounds(A.tiling[i]))
+end
+function Base.checkbounds(::Type{Bool}, A::TiledArray{T, N}, I::Vararg{Int, N}) where {T, N}
+    return checkbounds(Bool, A.tiling, I...) && checkbounds(Bool, A.data, @inbounds(A.tiling[I...]))
 end

@@ -13,5 +13,4 @@ abstract type AbstractTiledArray{T,N} <: AbstractArray{T,N} end
 include("periodicarray.jl")
 include("tiledarray.jl")
 
-
 end
