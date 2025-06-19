@@ -71,14 +71,21 @@ Base.parent(A::PeriodicArray) = A.data
 # -----------------------
 Base.size(A::PeriodicArray) = size(parent(A))
 
-function Base.getindex(A::PeriodicArray{T, N}, I::Vararg{Int, N}) where {T, N}
+@inline function Base.getindex(A::PeriodicArray{T, N}, I::Vararg{Int, N}) where {T, N}
+    @boundscheck checkbounds(A, I...)
     return @inbounds getindex(parent(A), map(mod1, I, size(A))...)
 end
-function Base.setindex!(A::PeriodicArray{T, N}, v, I::Vararg{Int, N}) where {T, N}
+@inline function Base.setindex!(A::PeriodicArray{T, N}, v, I::Vararg{Int, N}) where {T, N}
+    @boundscheck checkbounds(A, I...)
     return @inbounds setindex!(parent(A), v, map(mod1, I, size(A))...)
 end
 
-Base.checkbounds(::Type{Bool}, A::PeriodicArray, I...) = true
+function Base.checkbounds(::Type{Bool}, A::PeriodicArray{T, N}, I::Vararg{Int, N}) where {T, N}
+    return checkbounds(Bool, parent(A), map(mod1, I, size(A)))
+end
+function Base.checkbounds(::Type{Bool}, A::PeriodicArray{T, N, Array{T, N}}, I::Vararg{Int, N}) where {T, N}
+    return true
+end
 
 Base.LinearIndices(A::PeriodicArray) = PeriodicArray(LinearIndices(parent(A)))
 Base.CartesianIndices(A::PeriodicArray) = PeriodicArray(CartesianIndices(parent(A)))
