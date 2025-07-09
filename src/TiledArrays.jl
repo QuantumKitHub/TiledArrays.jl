@@ -1,4 +1,4 @@
-module LatticeArrays
+module TiledArrays
 
 export AbstractTiledArray, PeriodicArray, TiledArray
 
@@ -8,7 +8,7 @@ export AbstractTiledArray, PeriodicArray, TiledArray
 Abstract supertype for all arrays that have some form of tiling, ie repeated structure
 along their axes.
 """
-abstract type AbstractTiledArray{T,N} <: AbstractArray{T,N} end
+abstract type AbstractTiledArray{T, N} <: AbstractArray{T, N} end
 
 include("periodicarray.jl")
 include("tiledarray.jl")

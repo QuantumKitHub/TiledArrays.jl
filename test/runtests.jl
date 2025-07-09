@@ -1,4 +1,4 @@
-using LatticeArrays
+using TiledArrays
 using Test
 
 @testset "TiledArray" begin
