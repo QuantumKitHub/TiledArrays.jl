@@ -32,20 +32,12 @@ See also [`PeriodicVector`](@ref), [`PeriodicMatrix`](@ref)
 struct PeriodicArray{T, N, A <: AbstractArray{T, N}} <: AbstractTiledArray{T, N}
     data::A
 end
-
-PeriodicArray(data::AbstractArray{T, N}) where {T, N} = PeriodicArray{T, N}(data)
-PeriodicArray{T}(data::AbstractArray{T, N}) where {T, N} = PeriodicArray{T, N}(data)
-function PeriodicArray{T, N, A}(data::AbstractArray) where {T, N, A}
-    return PeriodicArray{T, N, A}(convert(A, data))
-end
-
 function PeriodicArray{T}(initializer, args...) where {T}
     return PeriodicArray(Array{T}(initializer, args...))
 end
 function PeriodicArray{T, N}(initializer, args...) where {T, N}
     return PeriodicArray(Array{T, N}(initializer, args...))
 end
-
 
 """
     PeriodicVector{T}
@@ -83,7 +75,9 @@ end
 function Base.checkbounds(::Type{Bool}, A::PeriodicArray{T, N}, I::Vararg{Int, N}) where {T, N}
     return checkbounds(Bool, parent(A), map(mod1, I, size(A)))
 end
-function Base.checkbounds(::Type{Bool}, A::PeriodicArray{T, N, Array{T, N}}, I::Vararg{Int, N}) where {T, N}
+function Base.checkbounds(
+        ::Type{Bool}, A::PeriodicArray{T, N, Array{T, N}}, I::Vararg{Int, N}
+    ) where {T, N}
     return true
 end
 
@@ -106,8 +100,7 @@ end
 Base.BroadcastStyle(::Type{T}) where {T <: PeriodicArray} = Broadcast.ArrayStyle{T}()
 
 function Base.similar(
-        bc::Broadcast.Broadcasted{<:Broadcast.ArrayStyle{<:PeriodicArray}},
-        ::Type{T}
+        bc::Broadcast.Broadcasted{<:Broadcast.ArrayStyle{<:PeriodicArray}}, ::Type{T}
     ) where {T}
     return PeriodicArray(similar(Array{T}, axes(bc)))
 end

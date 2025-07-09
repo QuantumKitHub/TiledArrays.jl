@@ -25,14 +25,15 @@ struct TiledArray{T, N, A <: AbstractArray{Int, N}} <: AbstractTiledArray{T, N}
     data::Vector{T}
     tiling::A
 
-    function TiledArray{T, N}(data::Vector{T}, tiling::Array{Int, N}) where {T, N}
-        issetequal(tiling, axes(data, 1)) || throw(ArgumentError("Incompatible data and tiling"))
-        return new{T, N}(data, tiling)
+    function TiledArray{T, N}(data::Vector{T}, tiling::A) where {T, N, A}
+        issetequal(tiling, axes(data, 1)) ||
+            throw(ArgumentError("Incompatible data and tiling"))
+        return new{T, N, A}(data, tiling)
     end
 
     function TiledArray{T, N}(::UndefInitializer, tiling::Array{Int, N}) where {T, N}
         data = Vector{T}(undef, length(unique(tiling)))
-        return new{T, N}(data, tiling)
+        return new{T, N, typeof(tiling)}(data, tiling)
     end
 end
 
@@ -52,7 +53,7 @@ Base.IndexStyle(::Type{T}) where {A, T <: TiledArray{<:Any, <:Any, <:A}} = Index
     @boundscheck checkbounds(A, i)
     return @inbounds A.data[A.tiling[i]]
 end
-@inline function Base.getindex(A::TiledArray{T, N}, I::Varar{Int, N}) where {T, N}
+@inline function Base.getindex(A::TiledArray{T, N}, I::Vararg{Int, N}) where {T, N}
     @boundscheck checkbounds(A, I...)
     return @inbounds A.data[A.tiling[I...]]
 end
@@ -68,8 +69,10 @@ end
 end
 
 function Base.checkbounds(::Type{Bool}, A::TiledArray, i::Int)
-    return checkbounds(Bool, A.tiling, i) && checkbounds(Bool, A.data, @inbounds(A.tiling[i]))
+    return checkbounds(Bool, A.tiling, i) &&
+        checkbounds(Bool, A.data, @inbounds(A.tiling[i]))
 end
 function Base.checkbounds(::Type{Bool}, A::TiledArray{T, N}, I::Vararg{Int, N}) where {T, N}
-    return checkbounds(Bool, A.tiling, I...) && checkbounds(Bool, A.data, @inbounds(A.tiling[I...]))
+    return checkbounds(Bool, A.tiling, I...) &&
+        checkbounds(Bool, A.data, @inbounds(A.tiling[I...]))
 end
