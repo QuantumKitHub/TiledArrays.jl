@@ -104,3 +104,16 @@ function Base.checkbounds(::Type{Bool}, A::TiledArray{T, N}, I::Vararg{Int, N}) 
     return checkbounds(Bool, A.tiling, I...) &&
         checkbounds(Bool, A.data, @inbounds(A.tiling[I...]))
 end
+
+# Rotating etc
+# ------------
+function Base.circshift(A::TiledArray{T, N}, shifts::NTuple{N, Int}) where {T, N}
+    return TiledArray{T, N}(copy(A.data), circshift(tiling(A), shifts))
+end
+
+# Base.map(f, A::TiledArray) = TiledArray(map(f, A.data), tiling(A))
+function tiledmap(f, A::AbstractArray, As::AbstractArray...)
+    allequal(tiling, (A, As...)) || throw(DimensionMismatch())
+    data = map(f, tilingdata.((A, As...))...)
+    return TiledArray(reshape(data, :), tiling(A))
+end
