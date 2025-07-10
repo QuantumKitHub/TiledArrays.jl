@@ -44,6 +44,26 @@ function TiledArray(data::Vector{T}, tiling::AbstractArray{Int, N}) where {T, N}
     return TiledArray{T, N}(data, tiling)
 end
 
+const InfiniteTiledArray{T, N} = TiledArray{T, N, PeriodicArray{Int, N, Array{Int, N}}}
+
+function InfiniteTiledArray(A::AbstractArray)
+    tiling = PeriodicArray{Int}(undef, size(A))
+    copyto!(tiling, 1:length(A))
+    C = TiledArray{eltype(A)}(undef, tiling)
+    copyto!(C.data, A)
+    return C
+end
+function InfiniteTiledArray(
+        data::Vector, tiling::PeriodicArray{Int, N, Array{Int, N}}
+    ) where {N}
+    return TiledArray{eltype(data), N}(data, tiling)
+end
+function InfiniteTiledArray{T}(
+        ::UndefInitializer, tiling::PeriodicArray{Int, N, Array{Int, N}}
+    ) where {T, N}
+    return TiledArray{T, N}(undef, tiling)
+end
+
 # Indexing
 # --------
 
