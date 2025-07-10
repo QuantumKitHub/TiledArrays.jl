@@ -64,6 +64,11 @@ function InfiniteTiledArray{T}(
     return TiledArray{T, N}(undef, tiling)
 end
 
+# Accessors
+# ---------
+tiling(A::TiledArray) = A.tiling
+tilingdata(A::TiledArray) = A.data
+
 # Indexing
 # --------
 
