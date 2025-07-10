@@ -73,7 +73,7 @@ end
 end
 
 function Base.checkbounds(::Type{Bool}, A::PeriodicArray{T, N}, I::Vararg{Int, N}) where {T, N}
-    return checkbounds(Bool, parent(A), map(mod1, I, size(A)))
+    return checkbounds(Bool, parent(A), map(mod1, I, size(A))...)
 end
 function Base.checkbounds(
         ::Type{Bool}, A::PeriodicArray{T, N, Array{T, N}}, I::Vararg{Int, N}
