@@ -23,21 +23,17 @@ tilinglength(A) = length(tilingdata(A))
 eachtilingindex(A) = eachtilingindex(IndexStyle(A), A)
 function eachtilingindex(::IndexLinear, A)
     tile = tiling(A)
+    inds = collect(keytype(tile), indexin(1:tilinglength(A), tile))
+    eltype(inds) isa Int && return inds
     linear = LinearIndices(A)
-    return map(1:tilinglength(A)) do i
-        ind = findfirst(==(i), tile)
-        @assert !isnothing(ind)
-        return linear[ind]
-    end
+    return linear[inds]
 end
 function eachtilingindex(::IndexCartesian, A)
     tile = tiling(A)
+    inds = collect(keytype(tile), indexin(1:tilinglength(A), tile))
+    eltype(inds) isa CartesianIndex && return inds
     cartesian = CartesianIndices(A)
-    return map(1:tilinglength(A)) do i
-        ind = findfirst(==(i), tile)
-        @assert !isnothing(ind)
-        return cartesian[ind]
-    end
+    return cartesian[inds]
 end
 
 include("periodicarray.jl")
