@@ -31,14 +31,17 @@ struct TiledArray{T, N, A <: AbstractArray{Int, N}} <: AbstractTiledArray{T, N}
         return new{T, N, A}(data, tiling)
     end
 
-    function TiledArray{T, N}(::UndefInitializer, tiling::Array{Int, N}) where {T, N}
+    function TiledArray{T, N}(::UndefInitializer, tiling::A) where {T, N, A}
         data = Vector{T}(undef, length(unique(tiling)))
-        return new{T, N, typeof(tiling)}(data, tiling)
+        return new{T, N, A}(data, tiling)
     end
 end
 
-function TiledArray{T}(::UndefInitializer, tiling::Array{Int, N}) where {T, N}
+function TiledArray{T}(::UndefInitializer, tiling::AbstractArray{Int, N}) where {T, N}
     return TiledArray{T, N}(undef, tiling)
+end
+function TiledArray(data::Vector{T}, tiling::AbstractArray{Int, N}) where {T, N}
+    return TiledArray{T, N}(data, tiling)
 end
 
 # Indexing
