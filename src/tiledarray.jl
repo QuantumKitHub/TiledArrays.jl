@@ -111,6 +111,12 @@ function Base.circshift(A::TiledArray{T, N}, shifts::NTuple{N, Int}) where {T, N
     return TiledArray{T, N}(copy(A.data), circshift(tiling(A), shifts))
 end
 
+for f in (:rot180, :rotl90, :rotr90)
+    @eval function Base.$f(A::TiledArray{T, N}) where {T, N}
+        return TiledArray{T, N}(copy(A.data), $f(tiling(A)))
+    end
+end
+
 # Base.map(f, A::TiledArray) = TiledArray(map(f, A.data), tiling(A))
 function tiledmap(f, A::AbstractArray, As::AbstractArray...)
     allequal(tiling, (A, As...)) || throw(DimensionMismatch())
